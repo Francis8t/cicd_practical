@@ -5,7 +5,7 @@ on:
     branches:
       - main
 
-# This workflow deploys the Django application to an EC2 instance whenever there is a push to the main branch. It uses SSH to connect to the EC2 instance, pulls the latest code, installs dependencies, runs migrations, collects static files, and restarts the Gunicorn service.
+# This workflow deploys the Django  to an EC2 instance whenever there is a push to the main branch. It uses SSH to connect to the EC2 instance, pulls the latest code, installs dependencies, runs migrations, collects static files, and restarts the Gunicorn service.
 jobs:
   deploy:
     runs-on: ubuntu-latest
