@@ -1,27 +1,35 @@
-name: Deploy to EC2
+steps:
+  - name: Checkout repository
+    uses: actions/checkout@v4
 
-on:
-  push:
-    branches: [ "main" ]
+  - name: Deploy application to EC2
+    uses: appleboy/ssh-action@v0.1.6
+    with:
+      host: ${{ secrets.EC2_HOST }}
+      username: ec2-user
+      key: ${{ secrets.SSH_KEY }}
+      script: |
+        set -e
 
-# This workflow will deploy the  to an EC2 instance whenever there is a push to the main branch. It uses the appleboy/ssh-action to SSH into the EC2 instance and execute the deployment commands.
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
+        echo "Navigating to project directory..."
+        cd /home/ec2-user/cicd_practical
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+        echo "Pulling latest code from GitHub..."
+        git pull origin main
 
-      - name: SSH and deploy
-        uses: appleboy/ssh-action@v0.1.6
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ec2-user
-          key: ${{ secrets.SSH_KEY }}
-          script: |
-            cd /home/ec2-user/cicd_practical
-            git pull origin main
-            source venv/bin/activate
-            pip install -r requirements.txt
-            sudo systemctl restart gunicorn
+        echo "Activating virtual environment..."
+        source venv/bin/activate
+
+        echo "Installing dependencies..."
+        pip install -r requirements.txt
+
+        echo "Running Django migrations..."
+        python manage.py migrate --noinput
+
+        echo "Collecting static files..."
+        python manage.py collectstatic --noinput
+
+        echo "Restarting Gunicorn service..."
+        sudo systemctl daemon-reload
+        sudo systemctl restart gunicorn
+        sudo systemctl status gunicorn --no-pager
