@@ -35,12 +35,6 @@ jobs:
             echo "Installing dependencies..."
             pip install -r requirements.txt
 
-            echo "Running Django migrations..."
-            python manage.py migrate --noinput
-
-            echo "Collecting static files..."
-            python manage.py collectstatic --noinput
-
             echo "Restarting Gunicorn service..."
             sudo systemctl daemon-reload
             sudo systemctl restart gunicorn
